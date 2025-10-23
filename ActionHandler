@@ -1,0 +1,38 @@
+public class ActionHandler {
+    public static void sendEmail(List<Action__c> acc)
+    {
+        Set<Id> ids=new Set<Id>();
+        for(Action__c setIds:acc)
+        {
+            ids.add(setIds.Id);
+            
+        }
+        
+        List<Action__c> actionwithowner=[select Id,Name,Action_Approver__c,Action_Approver__r.Name,Action_Approver__r.Email,Status__c from Action__c where Id=:ids];
+        List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
+
+        for(Action__c a:actionwithowner)
+        {
+            if(a.Status__c=='Pending' && a.Action_Approver__r.Email!=null)
+            {
+                Messaging.SingleEmailMessage mail=new Messaging.SingleEmailMessage();
+                   String[] toAddresses = new String[] {a.Action_Approver__r.Email};
+                   System.debug(a.Action_Approver__r.Email);
+                   mail.setToAddresses(toAddresses);
+                   mail.setSubject('Pending Approval for Action: ' + a.Name);
+                   mail.setPlainTextBody('Hi ' + a.Action_Approver__r.Name + ',\n\n' +
+                  'Your Action (' + a.Name + ') is pending approval.\n' +
+                    'Action Id: ' + a.Id + '\n' +
+                    'Status: ' + a.Status__c + '\n\n' +
+                      'Thank you.');
+                   
+                emails.add(mail);
+            }
+        }
+        if(emails!=null)
+        {
+            Messaging.sendEmail(emails);
+        }
+    }
+
+}
