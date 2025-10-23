@@ -1,0 +1,41 @@
+@isTest
+public class TestActionHandler {
+@TestSetup
+    public static void data()
+    {
+        Profile p=[select Id from Profile where Name='Standard User' limit 1];
+        User newUser=new User(
+            FirstName='Prash',
+            LastName='Ankam',
+            Alias='Pankam',
+            Email='prashanthiankam123@gmail.com',
+            Username='prash@test.com',
+            ProfileId=p.Id,
+            TimeZoneSidKey = 'America/Los_Angeles',
+            LocaleSidKey = 'en_US',
+            EmailEncodingKey = 'UTF-8',
+            LanguageLocaleKey = 'en_US'
+        );
+        insert newUser;
+        
+        Action__c accObj=new Action__c(
+            Name='Test',
+            Status__c='Pending',
+            Action_Approver__c=newUser.Id
+        );
+        
+        insert accObj;
+        
+      
+    }
+       @isTest
+        public static void testSendEmail()
+        {
+        List<Action__c> actions=[select Id,Status__c from Action__c];
+        Test.startTest();
+        ActionHandler.sendEmail(actions);
+        Test.stopTest();
+        }
+            
+    
+}
