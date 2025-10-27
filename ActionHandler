@@ -11,13 +11,13 @@ public class ActionHandler {
             
         }
         
-        List<Action__c> actionwithowner=[select Id,Name,count__c,Action_Approver__c,Action_Approver__r.Name,Action_Approver__r.Email,Status__c from Action__c where Id=:ids];
+        List<Action__c> actionwithowner=[select Id,Name,flag__c,Action_Approver__c,Action_Approver__r.Name,Action_Approver__r.Email,Status__c from Action__c where Id=:ids];
         List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
         List<Action__c> actionsToUpdate = new List<Action__c>();
 
         for(Action__c a:actionwithowner)
         {
-            if(a.Status__c=='Pending' && a.Action_Approver__r.Email!=null && (a.count__c == null || a.count__c < 1))
+            if(a.Status__c=='Pending' && a.Action_Approver__r.Email!=null && (a.flag__c==false))
             {
                 Messaging.SingleEmailMessage mail=new Messaging.SingleEmailMessage();
                    String[] toAddresses = new String[] {a.Action_Approver__r.Email};
@@ -28,11 +28,12 @@ public class ActionHandler {
                   'Your Action (' + a.Name + ') is pending approval.\n' +
                     'Action Id: ' + a.Id + '\n' +
                     'Status: ' + a.Status__c + '\n\n' +
-                    'Count: ' +a.count__c+'\n\n'+
+                    
                       'Thank you.');
                    
                 emails.add(mail);
-                a.count__c=(a.count__c == null ? 0 : a.count__c) + 1;
+              
+               a.flag__c=true;
                 actionsToUpdate.add(a);
             }
         }
