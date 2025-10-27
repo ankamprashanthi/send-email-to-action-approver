@@ -1,4 +1,4 @@
-trigger ActionTrigger on Action__c (before insert,before update) {
+trigger ActionTrigger on Action__c (after insert,after update) {
     ActionHandler.sendEmail(trigger.new);
 
 }
